@@ -1,7 +1,7 @@
 import telebot
 import os
 
-TOKEN = "8312139696:AAG15HwEicREGd0zQcfz1iRmxlgo1DeUf_A"
+TOKEN = os.environ['BOT_TOKEN']
 bot = telebot.TeleBot(TOKEN)
 
 FILENAME = "marks.txt"
