@@ -54,7 +54,7 @@ def show_table(subjects):
     if sum_credits > 0:
         avg_got = sum_got_w / sum_credits
         avg_max = sum_max_w / sum_credits
-        text += f"\nYour mark: {avg_got:.2f} / 20\nMax possible: {avg_max:.2f} / 20"
+        text += f"\nYour mog: {avg_got:.2f} / 20\nMax possible: {avg_max:.2f} / 20"
     return text
 
 
