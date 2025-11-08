@@ -4,6 +4,8 @@ import os
 TOKEN = os.environ['BOT_TOKEN']
 bot = telebot.TeleBot(TOKEN)
 
+MENU_TEXT = "Use /add to add a subject, /update to update marks, /show to see your results, /reset to start over."
+
 
 class Subject:
     def __init__(self, name, credits, got=0.0, max=0.0, total_max=20.0):
@@ -60,7 +62,7 @@ def show_table(subjects):
 
 @bot.message_handler(commands=["start"])
 def start(msg):
-    bot.reply_to(msg, "Welcome to Mark Manager!\nUse /add, /update, or /show")
+    bot.reply_to(msg, f"Welcome to Mark Manager!\n{MENU_TEXT}")
 
 
 @bot.message_handler(commands=["add"])
@@ -76,11 +78,14 @@ def handle_add(msg):
         subjects = load_subjects(chat_id)
         subjects.append(Subject(name, credits))
         save_subjects(chat_id, subjects)
-        # Show updated table after action
         result = show_table(subjects)
-        bot.reply_to(msg, f"✅ Added subject {name} ({credits} credits).\n\n{result}", parse_mode="Markdown")
-    except Exception as e:
-        bot.reply_to(msg, "❌ Format error. Use 'Name Credits'.")
+        bot.reply_to(
+            msg,
+            f"✅ Added subject {name} ({credits} credits).\n\n{result}\n\n{MENU_TEXT}",
+            parse_mode="Markdown"
+        )
+    except Exception:
+        bot.reply_to(msg, f"❌ Format error. Use 'Name Credits'.\n\n{MENU_TEXT}")
 
 
 @bot.message_handler(commands=["update"])
@@ -102,11 +107,15 @@ def handle_update(msg):
                 s.max += maxx
                 save_subjects(chat_id, subjects)
                 result = show_table(subjects)
-                bot.reply_to(msg, f"✅ Updated {name}: now {s.got}/{s.max}\n\n{result}", parse_mode="Markdown")
+                bot.reply_to(
+                    msg,
+                    f"✅ Updated {name}: now {s.got}/{s.max}\n\n{result}\n\n{MENU_TEXT}",
+                    parse_mode="Markdown"
+                )
                 return
-        bot.reply_to(msg, "❌ Subject not found.")
-    except Exception as e:
-        bot.reply_to(msg, "❌ Format error. Use 'Name got/max'.")
+        bot.reply_to(msg, f"❌ Subject not found.\n\n{MENU_TEXT}")
+    except Exception:
+        bot.reply_to(msg, f"❌ Format error. Use 'Name got/max'.\n\n{MENU_TEXT}")
 
 
 @bot.message_handler(commands=["show"])
@@ -114,7 +123,17 @@ def show(msg):
     chat_id = msg.chat.id
     subjects = load_subjects(chat_id)
     result = show_table(subjects)
-    bot.reply_to(msg, result, parse_mode="Markdown")
+    bot.reply_to(msg, f"{result}\n\n{MENU_TEXT}", parse_mode="Markdown")
+
+
+@bot.message_handler(commands=["reset"])
+def reset(msg):
+    chat_id = msg.chat.id
+    filename = get_filename(chat_id)
+    if os.path.exists(filename):
+        os.remove(filename)
+    bot.reply_to(msg, f"✅ Your data has been reset.\n\n{MENU_TEXT}")
 
 
 bot.polling(non_stop=True)
+
